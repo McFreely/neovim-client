@@ -1,19 +1,15 @@
 [package]
-name = "neovim-lib"
-version = "0.6.0"
-authors = ["daa84 <daa84@inbox.ru>"]
+name = "neovim-client"
+version = "0.1.0"
+authors = ["McFreely <paul@mcfreely.com>"]
 license = "LGPL-3.0"
 description = "msgpack-rpc neovim client"
-documentation = "https://docs.rs/neovim-lib"
-repository = "https://github.com/daa84/neovim-lib"
+repository = "https://github.com/McFreely/neovim-client"
 readme = "README.md"
 categories = ["api-bindings"]
 keywords = ["neovim"]
 exclude = ["generate.bat", "Makefile"]
 edition = "2018"
-
-[badges]
-travis-ci = { repository = "daa84/neovim-lib", branch = "master"  }
 
 [dependencies]
 rmpv = { version ="0.4", features=["with-serde"] }

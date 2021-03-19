@@ -1,4 +1,4 @@
-// Auto generated 2019-08-29 20:30:35.029910
+// Auto generated 2021-03-19 10:35:07.086552
 
 use crate::neovim::*;
 use crate::neovim_api::*;
@@ -6,6 +6,10 @@ use crate::r#async::AsyncCall;
 use crate::rpc::*;
 
 pub trait NeovimApiAsync {
+    /// since: 1
+    fn command_output_async(&mut self, command: &str) -> AsyncCall<'_, String>;
+    /// since: 3
+    fn execute_lua_async(&mut self, code: &str, args: Vec<Value>) -> AsyncCall<'_, Value>;
     /// since: 1
     fn ui_detach_async(&mut self) -> AsyncCall<'_, ()>;
     /// since: 1
@@ -15,6 +19,10 @@ pub trait NeovimApiAsync {
     /// since: 6
     fn ui_try_resize_grid_async(&mut self, grid: i64, width: i64, height: i64)
         -> AsyncCall<'_, ()>;
+    /// since: 6
+    fn ui_pum_set_height_async(&mut self, height: i64) -> AsyncCall<'_, ()>;
+    /// since: 7
+    fn exec_async(&mut self, src: &str, output: bool) -> AsyncCall<'_, String>;
     /// since: 1
     fn command_async(&mut self, command: &str) -> AsyncCall<'_, ()>;
     /// since: 3
@@ -22,6 +30,17 @@ pub trait NeovimApiAsync {
         -> AsyncCall<'_, Vec<(Value, Value)>>;
     /// since: 3
     fn get_hl_by_id_async(&mut self, hl_id: i64, rgb: bool) -> AsyncCall<'_, Vec<(Value, Value)>>;
+    /// since: 7
+    fn get_hl_id_by_name_async(&mut self, name: &str) -> AsyncCall<'_, i64>;
+    /// since: 7
+    fn set_hl_async(
+        &mut self,
+        ns_id: i64,
+        name: &str,
+        val: Vec<(Value, Value)>,
+    ) -> AsyncCall<'_, ()>;
+    /// since: 7
+    fn set_hl_ns_async(&mut self, ns_id: i64) -> AsyncCall<'_, ()>;
     /// since: 1
     fn feedkeys_async(&mut self, keys: &str, mode: &str, escape_csi: bool) -> AsyncCall<'_, ()>;
     /// since: 1
@@ -45,11 +64,16 @@ pub trait NeovimApiAsync {
         special: bool,
     ) -> AsyncCall<'_, String>;
     /// since: 1
-    fn command_output_async(&mut self, command: &str) -> AsyncCall<'_, String>;
-    /// since: 1
     fn eval_async(&mut self, expr: &str) -> AsyncCall<'_, Value>;
-    /// since: 3
-    fn execute_lua_async(&mut self, code: &str, args: Vec<Value>) -> AsyncCall<'_, Value>;
+    /// since: 7
+    fn exec_lua_async(&mut self, code: &str, args: Vec<Value>) -> AsyncCall<'_, Value>;
+    /// since: 7
+    fn notify_async(
+        &mut self,
+        msg: &str,
+        log_level: i64,
+        opts: Vec<(Value, Value)>,
+    ) -> AsyncCall<'_, Value>;
     /// since: 1
     fn call_function_async(&mut self, fname: &str, args: Vec<Value>) -> AsyncCall<'_, Value>;
     /// since: 4
@@ -63,6 +87,8 @@ pub trait NeovimApiAsync {
     fn strwidth_async(&mut self, text: &str) -> AsyncCall<'_, i64>;
     /// since: 1
     fn list_runtime_paths_async(&mut self) -> AsyncCall<'_, Vec<String>>;
+    /// since: 7
+    fn get_runtime_file_async(&mut self, name: &str, all: bool) -> AsyncCall<'_, Vec<String>>;
     /// since: 1
     fn set_current_dir_async(&mut self, dir: &str) -> AsyncCall<'_, ()>;
     /// since: 1
@@ -83,8 +109,19 @@ pub trait NeovimApiAsync {
     fn set_vvar_async(&mut self, name: &str, value: Value) -> AsyncCall<'_, ()>;
     /// since: 1
     fn get_option_async(&mut self, name: &str) -> AsyncCall<'_, Value>;
+    /// since: 7
+    fn get_all_options_info_async(&mut self) -> AsyncCall<'_, Vec<(Value, Value)>>;
+    /// since: 7
+    fn get_option_info_async(&mut self, name: &str) -> AsyncCall<'_, Vec<(Value, Value)>>;
     /// since: 1
     fn set_option_async(&mut self, name: &str, value: Value) -> AsyncCall<'_, ()>;
+    /// since: 7
+    fn echo_async(
+        &mut self,
+        chunks: Vec<Value>,
+        history: bool,
+        opts: Vec<(Value, Value)>,
+    ) -> AsyncCall<'_, ()>;
     /// since: 1
     fn out_write_async(&mut self, str: &str) -> AsyncCall<'_, ()>;
     /// since: 1
@@ -105,6 +142,11 @@ pub trait NeovimApiAsync {
     fn set_current_win_async(&mut self, window: &Window) -> AsyncCall<'_, ()>;
     /// since: 6
     fn create_buf_async(&mut self, listed: bool, scratch: bool) -> AsyncCall<'_, Buffer>;
+    /// since: 7
+    fn open_term_async(&mut self, buffer: &Buffer, opts: Vec<(Value, Value)>)
+        -> AsyncCall<'_, i64>;
+    /// since: 7
+    fn chan_send_async(&mut self, chan: i64, data: &str) -> AsyncCall<'_, ()>;
     /// since: 6
     fn open_win_async(
         &mut self,
@@ -123,7 +165,7 @@ pub trait NeovimApiAsync {
     /// since: 5
     fn get_namespaces_async(&mut self) -> AsyncCall<'_, Vec<(Value, Value)>>;
     /// since: 6
-    fn paste_async(&mut self, data: &str, phase: i64) -> AsyncCall<'_, bool>;
+    fn paste_async(&mut self, data: &str, crlf: bool, phase: i64) -> AsyncCall<'_, bool>;
     /// since: 6
     fn put_async(
         &mut self,
@@ -141,7 +183,10 @@ pub trait NeovimApiAsync {
     /// since: 1
     fn get_color_map_async(&mut self) -> AsyncCall<'_, Vec<(Value, Value)>>;
     /// since: 6
-    fn get_context_async(&mut self, types: Vec<Value>) -> AsyncCall<'_, Vec<(Value, Value)>>;
+    fn get_context_async(
+        &mut self,
+        opts: Vec<(Value, Value)>,
+    ) -> AsyncCall<'_, Vec<(Value, Value)>>;
     /// since: 6
     fn load_context_async(&mut self, dict: Vec<(Value, Value)>) -> AsyncCall<'_, Value>;
     /// since: 2
@@ -201,9 +246,25 @@ pub trait NeovimApiAsync {
         finish: bool,
         opts: Vec<(Value, Value)>,
     ) -> AsyncCall<'_, ()>;
+    /// since: 7
+    fn set_decoration_provider_async(
+        &mut self,
+        ns_id: i64,
+        opts: Vec<(Value, Value)>,
+    ) -> AsyncCall<'_, ()>;
 }
 
 impl NeovimApiAsync for Neovim {
+    fn command_output_async(&mut self, command: &str) -> AsyncCall<'_, String> {
+        self.session
+            .call_async::<String>("nvim_command_output", call_args![command])
+    }
+
+    fn execute_lua_async(&mut self, code: &str, args: Vec<Value>) -> AsyncCall<'_, Value> {
+        self.session
+            .call_async::<Value>("nvim_execute_lua", call_args![code, args])
+    }
+
     fn ui_detach_async(&mut self) -> AsyncCall<'_, ()> {
         self.session
             .call_async::<()>("nvim_ui_detach", call_args![])
@@ -229,6 +290,16 @@ impl NeovimApiAsync for Neovim {
             .call_async::<()>("nvim_ui_try_resize_grid", call_args![grid, width, height])
     }
 
+    fn ui_pum_set_height_async(&mut self, height: i64) -> AsyncCall<'_, ()> {
+        self.session
+            .call_async::<()>("nvim_ui_pum_set_height", call_args![height])
+    }
+
+    fn exec_async(&mut self, src: &str, output: bool) -> AsyncCall<'_, String> {
+        self.session
+            .call_async::<String>("nvim_exec", call_args![src, output])
+    }
+
     fn command_async(&mut self, command: &str) -> AsyncCall<'_, ()> {
         self.session
             .call_async::<()>("nvim_command", call_args![command])
@@ -246,6 +317,26 @@ impl NeovimApiAsync for Neovim {
     fn get_hl_by_id_async(&mut self, hl_id: i64, rgb: bool) -> AsyncCall<'_, Vec<(Value, Value)>> {
         self.session
             .call_async::<Vec<(Value, Value)>>("nvim_get_hl_by_id", call_args![hl_id, rgb])
+    }
+
+    fn get_hl_id_by_name_async(&mut self, name: &str) -> AsyncCall<'_, i64> {
+        self.session
+            .call_async::<i64>("nvim_get_hl_id_by_name", call_args![name])
+    }
+
+    fn set_hl_async(
+        &mut self,
+        ns_id: i64,
+        name: &str,
+        val: Vec<(Value, Value)>,
+    ) -> AsyncCall<'_, ()> {
+        self.session
+            .call_async::<()>("nvim_set_hl", call_args![ns_id, name, val])
+    }
+
+    fn set_hl_ns_async(&mut self, ns_id: i64) -> AsyncCall<'_, ()> {
+        self.session
+            .call_async::<()>("nvim_set_hl_ns", call_args![ns_id])
     }
 
     fn feedkeys_async(&mut self, keys: &str, mode: &str, escape_csi: bool) -> AsyncCall<'_, ()> {
@@ -286,19 +377,24 @@ impl NeovimApiAsync for Neovim {
         )
     }
 
-    fn command_output_async(&mut self, command: &str) -> AsyncCall<'_, String> {
-        self.session
-            .call_async::<String>("nvim_command_output", call_args![command])
-    }
-
     fn eval_async(&mut self, expr: &str) -> AsyncCall<'_, Value> {
         self.session
             .call_async::<Value>("nvim_eval", call_args![expr])
     }
 
-    fn execute_lua_async(&mut self, code: &str, args: Vec<Value>) -> AsyncCall<'_, Value> {
+    fn exec_lua_async(&mut self, code: &str, args: Vec<Value>) -> AsyncCall<'_, Value> {
         self.session
-            .call_async::<Value>("nvim_execute_lua", call_args![code, args])
+            .call_async::<Value>("nvim_exec_lua", call_args![code, args])
+    }
+
+    fn notify_async(
+        &mut self,
+        msg: &str,
+        log_level: i64,
+        opts: Vec<(Value, Value)>,
+    ) -> AsyncCall<'_, Value> {
+        self.session
+            .call_async::<Value>("nvim_notify", call_args![msg, log_level, opts])
     }
 
     fn call_function_async(&mut self, fname: &str, args: Vec<Value>) -> AsyncCall<'_, Value> {
@@ -324,6 +420,11 @@ impl NeovimApiAsync for Neovim {
     fn list_runtime_paths_async(&mut self) -> AsyncCall<'_, Vec<String>> {
         self.session
             .call_async::<Vec<String>>("nvim_list_runtime_paths", call_args![])
+    }
+
+    fn get_runtime_file_async(&mut self, name: &str, all: bool) -> AsyncCall<'_, Vec<String>> {
+        self.session
+            .call_async::<Vec<String>>("nvim_get_runtime_file", call_args![name, all])
     }
 
     fn set_current_dir_async(&mut self, dir: &str) -> AsyncCall<'_, ()> {
@@ -376,9 +477,29 @@ impl NeovimApiAsync for Neovim {
             .call_async::<Value>("nvim_get_option", call_args![name])
     }
 
+    fn get_all_options_info_async(&mut self) -> AsyncCall<'_, Vec<(Value, Value)>> {
+        self.session
+            .call_async::<Vec<(Value, Value)>>("nvim_get_all_options_info", call_args![])
+    }
+
+    fn get_option_info_async(&mut self, name: &str) -> AsyncCall<'_, Vec<(Value, Value)>> {
+        self.session
+            .call_async::<Vec<(Value, Value)>>("nvim_get_option_info", call_args![name])
+    }
+
     fn set_option_async(&mut self, name: &str, value: Value) -> AsyncCall<'_, ()> {
         self.session
             .call_async::<()>("nvim_set_option", call_args![name, value])
+    }
+
+    fn echo_async(
+        &mut self,
+        chunks: Vec<Value>,
+        history: bool,
+        opts: Vec<(Value, Value)>,
+    ) -> AsyncCall<'_, ()> {
+        self.session
+            .call_async::<()>("nvim_echo", call_args![chunks, history, opts])
     }
 
     fn out_write_async(&mut self, str: &str) -> AsyncCall<'_, ()> {
@@ -431,6 +552,20 @@ impl NeovimApiAsync for Neovim {
             .call_async::<Buffer>("nvim_create_buf", call_args![listed, scratch])
     }
 
+    fn open_term_async(
+        &mut self,
+        buffer: &Buffer,
+        opts: Vec<(Value, Value)>,
+    ) -> AsyncCall<'_, i64> {
+        self.session
+            .call_async::<i64>("nvim_open_term", call_args![buffer, opts])
+    }
+
+    fn chan_send_async(&mut self, chan: i64, data: &str) -> AsyncCall<'_, ()> {
+        self.session
+            .call_async::<()>("nvim_chan_send", call_args![chan, data])
+    }
+
     fn open_win_async(
         &mut self,
         buffer: &Buffer,
@@ -466,9 +601,9 @@ impl NeovimApiAsync for Neovim {
             .call_async::<Vec<(Value, Value)>>("nvim_get_namespaces", call_args![])
     }
 
-    fn paste_async(&mut self, data: &str, phase: i64) -> AsyncCall<'_, bool> {
+    fn paste_async(&mut self, data: &str, crlf: bool, phase: i64) -> AsyncCall<'_, bool> {
         self.session
-            .call_async::<bool>("nvim_paste", call_args![data, phase])
+            .call_async::<bool>("nvim_paste", call_args![data, crlf, phase])
     }
 
     fn put_async(
@@ -502,9 +637,12 @@ impl NeovimApiAsync for Neovim {
             .call_async::<Vec<(Value, Value)>>("nvim_get_color_map", call_args![])
     }
 
-    fn get_context_async(&mut self, types: Vec<Value>) -> AsyncCall<'_, Vec<(Value, Value)>> {
+    fn get_context_async(
+        &mut self,
+        opts: Vec<(Value, Value)>,
+    ) -> AsyncCall<'_, Vec<(Value, Value)>> {
         self.session
-            .call_async::<Vec<(Value, Value)>>("nvim_get_context", call_args![types])
+            .call_async::<Vec<(Value, Value)>>("nvim_get_context", call_args![opts])
     }
 
     fn load_context_async(&mut self, dict: Vec<(Value, Value)>) -> AsyncCall<'_, Value> {
@@ -618,5 +756,14 @@ impl NeovimApiAsync for Neovim {
             "nvim_select_popupmenu_item",
             call_args![item, insert, finish, opts],
         )
+    }
+
+    fn set_decoration_provider_async(
+        &mut self,
+        ns_id: i64,
+        opts: Vec<(Value, Value)>,
+    ) -> AsyncCall<'_, ()> {
+        self.session
+            .call_async::<()>("nvim_set_decoration_provider", call_args![ns_id, opts])
     }
 }

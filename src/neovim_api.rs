@@ -1,4 +1,4 @@
-// Auto generated 2019-08-29 20:30:34.996423
+// Auto generated 2021-03-19 10:35:07.372181
 
 use crate::neovim::*;
 use crate::rpc::*;
@@ -85,6 +85,32 @@ impl Buffer {
                     start,
                     end,
                     strict_indexing,
+                    replacement
+                ],
+            )
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+    /// since: 7
+    pub fn set_text(
+        &self,
+        neovim: &mut Neovim,
+        start_row: i64,
+        start_col: i64,
+        end_row: i64,
+        end_col: i64,
+        replacement: Vec<String>,
+    ) -> Result<(), CallError> {
+        neovim
+            .session
+            .call(
+                "nvim_buf_set_text",
+                call_args![
+                    self.code_data.clone(),
+                    start_row,
+                    start_col,
+                    end_row,
+                    end_col,
                     replacement
                 ],
             )
@@ -227,14 +253,6 @@ impl Buffer {
             .map_err(map_generic_error)
     }
     /// since: 1
-    pub fn get_number(&self, neovim: &mut Neovim) -> Result<i64, CallError> {
-        neovim
-            .session
-            .call("nvim_buf_get_number", call_args![self.code_data.clone()])
-            .map(map_result)
-            .map_err(map_generic_error)
-    }
-    /// since: 1
     pub fn get_name(&self, neovim: &mut Neovim) -> Result<String, CallError> {
         neovim
             .session
@@ -261,6 +279,14 @@ impl Buffer {
             .map(map_result)
             .map_err(map_generic_error)
     }
+    /// since: 7
+    pub fn delete(&self, neovim: &mut Neovim, opts: Vec<(Value, Value)>) -> Result<(), CallError> {
+        neovim
+            .session
+            .call("nvim_buf_delete", call_args![self.code_data.clone(), opts])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
     /// since: 1
     pub fn is_valid(&self, neovim: &mut Neovim) -> Result<bool, CallError> {
         neovim
@@ -276,6 +302,70 @@ impl Buffer {
             .call(
                 "nvim_buf_get_mark",
                 call_args![self.code_data.clone(), name],
+            )
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+    /// since: 7
+    pub fn get_extmark_by_id(
+        &self,
+        neovim: &mut Neovim,
+        ns_id: i64,
+        id: i64,
+        opts: Vec<(Value, Value)>,
+    ) -> Result<Vec<i64>, CallError> {
+        neovim
+            .session
+            .call(
+                "nvim_buf_get_extmark_by_id",
+                call_args![self.code_data.clone(), ns_id, id, opts],
+            )
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+    /// since: 7
+    pub fn get_extmarks(
+        &self,
+        neovim: &mut Neovim,
+        ns_id: i64,
+        start: Value,
+        end: Value,
+        opts: Vec<(Value, Value)>,
+    ) -> Result<Vec<Value>, CallError> {
+        neovim
+            .session
+            .call(
+                "nvim_buf_get_extmarks",
+                call_args![self.code_data.clone(), ns_id, start, end, opts],
+            )
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+    /// since: 7
+    pub fn set_extmark(
+        &self,
+        neovim: &mut Neovim,
+        ns_id: i64,
+        line: i64,
+        col: i64,
+        opts: Vec<(Value, Value)>,
+    ) -> Result<i64, CallError> {
+        neovim
+            .session
+            .call(
+                "nvim_buf_set_extmark",
+                call_args![self.code_data.clone(), ns_id, line, col, opts],
+            )
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+    /// since: 7
+    pub fn del_extmark(&self, neovim: &mut Neovim, ns_id: i64, id: i64) -> Result<bool, CallError> {
+        neovim
+            .session
+            .call(
+                "nvim_buf_del_extmark",
+                call_args![self.code_data.clone(), ns_id, id],
             )
             .map(map_result)
             .map_err(map_generic_error)
@@ -323,6 +413,32 @@ impl Buffer {
             .map(map_result)
             .map_err(map_generic_error)
     }
+    /// since: 5
+    pub fn set_virtual_text(
+        &self,
+        neovim: &mut Neovim,
+        src_id: i64,
+        line: i64,
+        chunks: Vec<Value>,
+        opts: Vec<(Value, Value)>,
+    ) -> Result<i64, CallError> {
+        neovim
+            .session
+            .call(
+                "nvim_buf_set_virtual_text",
+                call_args![self.code_data.clone(), src_id, line, chunks, opts],
+            )
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+    /// since: 1
+    pub fn get_number(&self, neovim: &mut Neovim) -> Result<i64, CallError> {
+        neovim
+            .session
+            .call("nvim_buf_get_number", call_args![self.code_data.clone()])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
     /// since: 1
     pub fn clear_highlight(
         &self,
@@ -336,24 +452,6 @@ impl Buffer {
             .call(
                 "nvim_buf_clear_highlight",
                 call_args![self.code_data.clone(), ns_id, line_start, line_end],
-            )
-            .map(map_result)
-            .map_err(map_generic_error)
-    }
-    /// since: 5
-    pub fn set_virtual_text(
-        &self,
-        neovim: &mut Neovim,
-        ns_id: i64,
-        line: i64,
-        chunks: Vec<Value>,
-        opts: Vec<(Value, Value)>,
-    ) -> Result<i64, CallError> {
-        neovim
-            .session
-            .call(
-                "nvim_buf_set_virtual_text",
-                call_args![self.code_data.clone(), ns_id, line, chunks, opts],
             )
             .map(map_result)
             .map_err(map_generic_error)
@@ -691,6 +789,10 @@ impl<'a> IntoVal<Value> for &'a Tabpage {
 
 pub trait NeovimApi {
     /// since: 1
+    fn command_output(&mut self, command: &str) -> Result<String, CallError>;
+    /// since: 3
+    fn execute_lua(&mut self, code: &str, args: Vec<Value>) -> Result<Value, CallError>;
+    /// since: 1
     fn ui_detach(&mut self) -> Result<(), CallError>;
     /// since: 1
     fn ui_try_resize(&mut self, width: i64, height: i64) -> Result<(), CallError>;
@@ -698,12 +800,23 @@ pub trait NeovimApi {
     fn ui_set_option(&mut self, name: &str, value: Value) -> Result<(), CallError>;
     /// since: 6
     fn ui_try_resize_grid(&mut self, grid: i64, width: i64, height: i64) -> Result<(), CallError>;
+    /// since: 6
+    fn ui_pum_set_height(&mut self, height: i64) -> Result<(), CallError>;
+    /// since: 7
+    fn exec(&mut self, src: &str, output: bool) -> Result<String, CallError>;
     /// since: 1
     fn command(&mut self, command: &str) -> Result<(), CallError>;
     /// since: 3
     fn get_hl_by_name(&mut self, name: &str, rgb: bool) -> Result<Vec<(Value, Value)>, CallError>;
     /// since: 3
     fn get_hl_by_id(&mut self, hl_id: i64, rgb: bool) -> Result<Vec<(Value, Value)>, CallError>;
+    /// since: 7
+    fn get_hl_id_by_name(&mut self, name: &str) -> Result<i64, CallError>;
+    /// since: 7
+    fn set_hl(&mut self, ns_id: i64, name: &str, val: Vec<(Value, Value)>)
+        -> Result<(), CallError>;
+    /// since: 7
+    fn set_hl_ns(&mut self, ns_id: i64) -> Result<(), CallError>;
     /// since: 1
     fn feedkeys(&mut self, keys: &str, mode: &str, escape_csi: bool) -> Result<(), CallError>;
     /// since: 1
@@ -727,11 +840,16 @@ pub trait NeovimApi {
         special: bool,
     ) -> Result<String, CallError>;
     /// since: 1
-    fn command_output(&mut self, command: &str) -> Result<String, CallError>;
-    /// since: 1
     fn eval(&mut self, expr: &str) -> Result<Value, CallError>;
-    /// since: 3
-    fn execute_lua(&mut self, code: &str, args: Vec<Value>) -> Result<Value, CallError>;
+    /// since: 7
+    fn exec_lua(&mut self, code: &str, args: Vec<Value>) -> Result<Value, CallError>;
+    /// since: 7
+    fn notify(
+        &mut self,
+        msg: &str,
+        log_level: i64,
+        opts: Vec<(Value, Value)>,
+    ) -> Result<Value, CallError>;
     /// since: 1
     fn call_function(&mut self, fname: &str, args: Vec<Value>) -> Result<Value, CallError>;
     /// since: 4
@@ -745,6 +863,8 @@ pub trait NeovimApi {
     fn strwidth(&mut self, text: &str) -> Result<i64, CallError>;
     /// since: 1
     fn list_runtime_paths(&mut self) -> Result<Vec<String>, CallError>;
+    /// since: 7
+    fn get_runtime_file(&mut self, name: &str, all: bool) -> Result<Vec<String>, CallError>;
     /// since: 1
     fn set_current_dir(&mut self, dir: &str) -> Result<(), CallError>;
     /// since: 1
@@ -765,8 +885,19 @@ pub trait NeovimApi {
     fn set_vvar(&mut self, name: &str, value: Value) -> Result<(), CallError>;
     /// since: 1
     fn get_option(&mut self, name: &str) -> Result<Value, CallError>;
+    /// since: 7
+    fn get_all_options_info(&mut self) -> Result<Vec<(Value, Value)>, CallError>;
+    /// since: 7
+    fn get_option_info(&mut self, name: &str) -> Result<Vec<(Value, Value)>, CallError>;
     /// since: 1
     fn set_option(&mut self, name: &str, value: Value) -> Result<(), CallError>;
+    /// since: 7
+    fn echo(
+        &mut self,
+        chunks: Vec<Value>,
+        history: bool,
+        opts: Vec<(Value, Value)>,
+    ) -> Result<(), CallError>;
     /// since: 1
     fn out_write(&mut self, str: &str) -> Result<(), CallError>;
     /// since: 1
@@ -787,6 +918,10 @@ pub trait NeovimApi {
     fn set_current_win(&mut self, window: &Window) -> Result<(), CallError>;
     /// since: 6
     fn create_buf(&mut self, listed: bool, scratch: bool) -> Result<Buffer, CallError>;
+    /// since: 7
+    fn open_term(&mut self, buffer: &Buffer, opts: Vec<(Value, Value)>) -> Result<i64, CallError>;
+    /// since: 7
+    fn chan_send(&mut self, chan: i64, data: &str) -> Result<(), CallError>;
     /// since: 6
     fn open_win(
         &mut self,
@@ -805,7 +940,7 @@ pub trait NeovimApi {
     /// since: 5
     fn get_namespaces(&mut self) -> Result<Vec<(Value, Value)>, CallError>;
     /// since: 6
-    fn paste(&mut self, data: &str, phase: i64) -> Result<bool, CallError>;
+    fn paste(&mut self, data: &str, crlf: bool, phase: i64) -> Result<bool, CallError>;
     /// since: 6
     fn put(
         &mut self,
@@ -823,7 +958,7 @@ pub trait NeovimApi {
     /// since: 1
     fn get_color_map(&mut self) -> Result<Vec<(Value, Value)>, CallError>;
     /// since: 6
-    fn get_context(&mut self, types: Vec<Value>) -> Result<Vec<(Value, Value)>, CallError>;
+    fn get_context(&mut self, opts: Vec<(Value, Value)>) -> Result<Vec<(Value, Value)>, CallError>;
     /// since: 6
     fn load_context(&mut self, dict: Vec<(Value, Value)>) -> Result<Value, CallError>;
     /// since: 2
@@ -881,9 +1016,29 @@ pub trait NeovimApi {
         finish: bool,
         opts: Vec<(Value, Value)>,
     ) -> Result<(), CallError>;
+    /// since: 7
+    fn set_decoration_provider(
+        &mut self,
+        ns_id: i64,
+        opts: Vec<(Value, Value)>,
+    ) -> Result<(), CallError>;
 }
 
 impl NeovimApi for Neovim {
+    fn command_output(&mut self, command: &str) -> Result<String, CallError> {
+        self.session
+            .call("nvim_command_output", call_args![command])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
+    fn execute_lua(&mut self, code: &str, args: Vec<Value>) -> Result<Value, CallError> {
+        self.session
+            .call("nvim_execute_lua", call_args![code, args])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
     fn ui_detach(&mut self) -> Result<(), CallError> {
         self.session
             .call("nvim_ui_detach", call_args![])
@@ -912,6 +1067,20 @@ impl NeovimApi for Neovim {
             .map_err(map_generic_error)
     }
 
+    fn ui_pum_set_height(&mut self, height: i64) -> Result<(), CallError> {
+        self.session
+            .call("nvim_ui_pum_set_height", call_args![height])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
+    fn exec(&mut self, src: &str, output: bool) -> Result<String, CallError> {
+        self.session
+            .call("nvim_exec", call_args![src, output])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
     fn command(&mut self, command: &str) -> Result<(), CallError> {
         self.session
             .call("nvim_command", call_args![command])
@@ -929,6 +1098,32 @@ impl NeovimApi for Neovim {
     fn get_hl_by_id(&mut self, hl_id: i64, rgb: bool) -> Result<Vec<(Value, Value)>, CallError> {
         self.session
             .call("nvim_get_hl_by_id", call_args![hl_id, rgb])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
+    fn get_hl_id_by_name(&mut self, name: &str) -> Result<i64, CallError> {
+        self.session
+            .call("nvim_get_hl_id_by_name", call_args![name])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
+    fn set_hl(
+        &mut self,
+        ns_id: i64,
+        name: &str,
+        val: Vec<(Value, Value)>,
+    ) -> Result<(), CallError> {
+        self.session
+            .call("nvim_set_hl", call_args![ns_id, name, val])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
+    fn set_hl_ns(&mut self, ns_id: i64) -> Result<(), CallError> {
+        self.session
+            .call("nvim_set_hl_ns", call_args![ns_id])
             .map(map_result)
             .map_err(map_generic_error)
     }
@@ -981,13 +1176,6 @@ impl NeovimApi for Neovim {
             .map_err(map_generic_error)
     }
 
-    fn command_output(&mut self, command: &str) -> Result<String, CallError> {
-        self.session
-            .call("nvim_command_output", call_args![command])
-            .map(map_result)
-            .map_err(map_generic_error)
-    }
-
     fn eval(&mut self, expr: &str) -> Result<Value, CallError> {
         self.session
             .call("nvim_eval", call_args![expr])
@@ -995,9 +1183,21 @@ impl NeovimApi for Neovim {
             .map_err(map_generic_error)
     }
 
-    fn execute_lua(&mut self, code: &str, args: Vec<Value>) -> Result<Value, CallError> {
+    fn exec_lua(&mut self, code: &str, args: Vec<Value>) -> Result<Value, CallError> {
         self.session
-            .call("nvim_execute_lua", call_args![code, args])
+            .call("nvim_exec_lua", call_args![code, args])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
+    fn notify(
+        &mut self,
+        msg: &str,
+        log_level: i64,
+        opts: Vec<(Value, Value)>,
+    ) -> Result<Value, CallError> {
+        self.session
+            .call("nvim_notify", call_args![msg, log_level, opts])
             .map(map_result)
             .map_err(map_generic_error)
     }
@@ -1031,6 +1231,13 @@ impl NeovimApi for Neovim {
     fn list_runtime_paths(&mut self) -> Result<Vec<String>, CallError> {
         self.session
             .call("nvim_list_runtime_paths", call_args![])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
+    fn get_runtime_file(&mut self, name: &str, all: bool) -> Result<Vec<String>, CallError> {
+        self.session
+            .call("nvim_get_runtime_file", call_args![name, all])
             .map(map_result)
             .map_err(map_generic_error)
     }
@@ -1105,9 +1312,35 @@ impl NeovimApi for Neovim {
             .map_err(map_generic_error)
     }
 
+    fn get_all_options_info(&mut self) -> Result<Vec<(Value, Value)>, CallError> {
+        self.session
+            .call("nvim_get_all_options_info", call_args![])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
+    fn get_option_info(&mut self, name: &str) -> Result<Vec<(Value, Value)>, CallError> {
+        self.session
+            .call("nvim_get_option_info", call_args![name])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
     fn set_option(&mut self, name: &str, value: Value) -> Result<(), CallError> {
         self.session
             .call("nvim_set_option", call_args![name, value])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
+    fn echo(
+        &mut self,
+        chunks: Vec<Value>,
+        history: bool,
+        opts: Vec<(Value, Value)>,
+    ) -> Result<(), CallError> {
+        self.session
+            .call("nvim_echo", call_args![chunks, history, opts])
             .map(map_result)
             .map_err(map_generic_error)
     }
@@ -1182,6 +1415,20 @@ impl NeovimApi for Neovim {
             .map_err(map_generic_error)
     }
 
+    fn open_term(&mut self, buffer: &Buffer, opts: Vec<(Value, Value)>) -> Result<i64, CallError> {
+        self.session
+            .call("nvim_open_term", call_args![buffer, opts])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
+    fn chan_send(&mut self, chan: i64, data: &str) -> Result<(), CallError> {
+        self.session
+            .call("nvim_chan_send", call_args![chan, data])
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
     fn open_win(
         &mut self,
         buffer: &Buffer,
@@ -1229,9 +1476,9 @@ impl NeovimApi for Neovim {
             .map_err(map_generic_error)
     }
 
-    fn paste(&mut self, data: &str, phase: i64) -> Result<bool, CallError> {
+    fn paste(&mut self, data: &str, crlf: bool, phase: i64) -> Result<bool, CallError> {
         self.session
-            .call("nvim_paste", call_args![data, phase])
+            .call("nvim_paste", call_args![data, crlf, phase])
             .map(map_result)
             .map_err(map_generic_error)
     }
@@ -1277,9 +1524,9 @@ impl NeovimApi for Neovim {
             .map_err(map_generic_error)
     }
 
-    fn get_context(&mut self, types: Vec<Value>) -> Result<Vec<(Value, Value)>, CallError> {
+    fn get_context(&mut self, opts: Vec<(Value, Value)>) -> Result<Vec<(Value, Value)>, CallError> {
         self.session
-            .call("nvim_get_context", call_args![types])
+            .call("nvim_get_context", call_args![opts])
             .map(map_result)
             .map_err(map_generic_error)
     }
@@ -1425,6 +1672,17 @@ impl NeovimApi for Neovim {
                 "nvim_select_popupmenu_item",
                 call_args![item, insert, finish, opts],
             )
+            .map(map_result)
+            .map_err(map_generic_error)
+    }
+
+    fn set_decoration_provider(
+        &mut self,
+        ns_id: i64,
+        opts: Vec<(Value, Value)>,
+    ) -> Result<(), CallError> {
+        self.session
+            .call("nvim_set_decoration_provider", call_args![ns_id, opts])
             .map(map_result)
             .map_err(map_generic_error)
     }
